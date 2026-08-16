@@ -1,0 +1,31 @@
+field_name,data_type,units,description
+session_id,string,n/a,unique identifier for the measurement session (one background-noise recording per session)
+date,date,ISO 8601,session date
+operator,string,n/a,person running the session
+board_variant,string,n/a,"one of S90-0402, S90-0603, S90-0805, W90-0603, S0-0603 (see pcb_variants.csv)"
+capacitor_role,string,n/a,reference or candidate
+capacitor_id,string,n/a,"REF, or TBD-n for candidates; no commercial part numbers yet"
+capacitor_rated_voltage_V,float,V,rated voltage of the capacitor under test; used for the voltage-budget check
+stage,string,n/a,"background, broad-low, broad-high, dense-f, or dense-2f"
+freq_set_hz,float,Hz,commanded excitation frequency
+function_gen_Vac_peak_V,float,V_peak,commanded generator AC amplitude (V_peak convention throughout)
+function_gen_Vdc_V,float,V,commanded generator DC offset
+voltage_budget_ok,boolean,n/a,"true if abs(Vdc) + Vac_peak <= capacitor_rated_voltage_V, checked with the commanded values before the run and re-checked with measured values after"
+settle_time_s,float,s,settle time before recording (protocol default 0.5 s)
+record_time_s,float,s,recording duration (protocol default 2.0 s)
+DUT_Vac_peak_measured_V,float,V_peak,"measured AC amplitude across the capacitor (from SENSE+/SENSE-), not the generator setting"
+DUT_Vdc_measured_V,float,V,measured DC offset across the capacitor
+C_nominal_F,float,F,nominal capacitance used for the I_peak estimate
+I_peak_predicted_A,float,A,"2*pi*f*C*V_peak, computed from C_nominal_F and DUT_Vac_peak_measured_V (or commanded value, pre-run)"
+shunt_used,boolean,n/a,true only during a commissioning step per ELECTRICAL_MEASUREMENT_SETUP.md section 9
+I_peak_measured_A,float,A,measured drive current via the 0.1 ohm shunt; populated only when shunt_used is true
+mic_raw_waveform_file,string,n/a,filename/path of the saved raw microphone waveform for this frequency point
+scope_raw_waveform_file,string,n/a,filename/path of the saved SENSE+/SENSE- (V_DUT) waveform for this frequency point
+acoustic_amplitude_at_f_Pa,float,Pa,extracted acoustic amplitude at the fundamental excitation frequency f (calibrated microphone units)
+acoustic_amplitude_at_2f_Pa,float,Pa,extracted acoustic amplitude at the second harmonic 2f (calibrated microphone units)
+background_reference_id,string,n/a,links to the >=10 s generator-off background-noise recording taken at the start of this session
+LDV_used,boolean,n/a,true only if an optional LDV validation measurement was taken for this point
+LDV_velocity_at_f_mm_s,float,mm/s,optional LDV-measured velocity amplitude at f; populated only when LDV_used is true
+LDV_velocity_at_2f_mm_s,float,mm/s,optional LDV-measured velocity amplitude at 2f; populated only when LDV_used is true
+amplifier_fallback_flag,boolean,n/a,true if this point tripped the amplitude-collapse / clipping / current-limit trigger in ELECTRICAL_MEASUREMENT_SETUP.md section 6
+notes,string,n/a,free text
