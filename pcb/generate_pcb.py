@@ -34,6 +34,18 @@ PACKAGES = {
     "0805": dict(pad_w=1.2, pad_h=1.45, pitch=1.9),
 }
 
+# Standard KiCad-shipped 3D models, used for visual rendering only (Step 7).
+# Does NOT change footprint pads/electrical definition -- see
+# design/PCB_CAD_ASSUMPTIONS.md. Path is this machine's KiCad install
+# location; portable installs should use ${KICAD9_3DMODEL_DIR}-style env
+# vars instead if moving to a different machine/KiCad version.
+KICAD_3D_BASE = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/3dmodels"
+PACKAGE_3D_MODELS = {
+    "0402": f"{KICAD_3D_BASE}/Capacitor_SMD.3dshapes/C_0402_1005Metric.step",
+    "0603": f"{KICAD_3D_BASE}/Capacitor_SMD.3dshapes/C_0603_1608Metric.step",
+    "0805": f"{KICAD_3D_BASE}/Capacitor_SMD.3dshapes/C_0805_2012Metric.step",
+}
+
 # from design/pcb_coordinates.csv (v0.3.0-C) -- do not change without
 # re-checking against that file
 VARIANTS = {
@@ -151,14 +163,27 @@ def mlcc_pad_positions(pkg, mlcc_x, mlcc_y, orientation):
     """Return (pad1_xy, pad2_xy) in board coordinates. pad1 = '+' terminal,
     pad2 = '-' terminal, per the convention documented in
     design/PCB_CAD_ASSUMPTIONS.md.
+
+    Uses KiCad's actual footprint-rotation convention: positive angle
+    rotates CLOCKWISE in the stored (x, y-down) frame, i.e.
+        world = (fx + lx*cos(theta) + ly*sin(theta),
+                 fy - lx*sin(theta) + ly*cos(theta))
+    This was confirmed empirically against real `kicad-cli pcb drc` output
+    on 2026-08-16 (see pcb/NET_CONNECTIVITY_REVIEW.md) after the original
+    CCW-assumed formula produced real DRIVE+/DRIVE- shorts on every 90-deg
+    board: KiCad placed pad "1" (net DRIVE_SENSE_PLUS, local x=-pitch/2) at
+    the *larger*-y position for orientation=90, not the smaller one.
     """
     pitch = PACKAGES[pkg]["pitch"]
-    if orientation == 90:
-        pad1 = (mlcc_x, round(mlcc_y - pitch / 2, 3))
-        pad2 = (mlcc_x, round(mlcc_y + pitch / 2, 3))
-    else:
-        pad1 = (round(mlcc_x - pitch / 2, 3), mlcc_y)
-        pad2 = (round(mlcc_x + pitch / 2, 3), mlcc_y)
+    theta = math.radians(orientation)
+
+    def rotate(lx, ly):
+        wx = mlcc_x + lx * math.cos(theta) + ly * math.sin(theta)
+        wy = mlcc_y - lx * math.sin(theta) + ly * math.cos(theta)
+        return (round(wx, 3), round(wy, 3))
+
+    pad1 = rotate(-pitch / 2, 0)
+    pad2 = rotate(pitch / 2, 0)
     return pad1, pad2
 
 
@@ -189,6 +214,11 @@ def mlcc_footprint(variant, pkg, mlcc_x, mlcc_y, orientation):
         f'(layers "F.Cu" "F.Paste" "F.Mask") (net 1 "{NET_PLUS}") (uuid "{new_uuid()}"))\n'
         f'\t\t(pad "2" smd rect (at {pitch/2} 0) (size {pad_w} {pad_h}) '
         f'(layers "F.Cu" "F.Paste" "F.Mask") (net 2 "{NET_MINUS}") (uuid "{new_uuid()}"))\n'
+        f'\t\t(model "{PACKAGE_3D_MODELS[pkg]}"\n'
+        f"\t\t\t(offset (xyz 0 0 0))\n"
+        f"\t\t\t(scale (xyz 1 1 1))\n"
+        f"\t\t\t(rotate (xyz 0 0 0))\n"
+        f"\t\t)\n"
         f'\t\t(uuid "{fp_uuid}")\n'
         f"\t)\n"
     )
@@ -238,21 +268,52 @@ def route_traces(pkg, mlcc_x, mlcc_y, orientation):
     pad1, pad2 = mlcc_pad_positions(pkg, mlcc_x, mlcc_y, orientation)  # pad1='+', pad2='-'
     out = []
 
-    # each net gets its own staging x-lane so vertical runs never coincide
-    staging_x = {name: mlcc_x - 8 + i for i, (name, _) in enumerate(EDGE_PADS)}
-
     if orientation == 90:
-        # pads differ in Y only -> direct 3-segment L route per net, no detour needed
-        for name, edge_y in EDGE_PADS:
-            target = pad1 if name in ("DRIVE+", "SENSE+") else pad2
-            net_num = 1 if name in ("DRIVE+", "SENSE+") else 2
-            net_name = NET_PLUS if net_num == 1 else NET_MINUS
-            width = DRIVE_TRACE_W if name in ("DRIVE+", "DRIVE-") else SENSE_TRACE_W
-            sx = staging_x[name]
+        # For orientation=90, KiCad's actual (confirmed) rotation places pad1
+        # ('+') and pad2 ('-') at mlcc_y +/- pitch/2 -- which one is upper
+        # depends on the variant (for S90/W90 pad1 ends up upper), and for
+        # W90 specifically (mlcc_y=20) both targets fall *between* the '+'
+        # group's edge pads (12.5/17.5) and the '-' group's edge pads
+        # (22.5/27.5), so EITHER group's straight vertical descent/ascent
+        # passes directly through the other's target point. This was proven
+        # to have no crossing-free solution using straight lines confined to
+        # x <= mlcc_x (both groups' combined paths necessarily span the full
+        # x-range, and one group's target sits inside the other's transit
+        # span, in both directions for W90) -- confirmed by exhausting the
+        # lane-ordering options against real `kicad-cli pcb drc` output; see
+        # pcb/NET_CONNECTIVITY_REVIEW.md.
+        #
+        # Fix: give the '-' group (SENSE-, DRIVE-) a detour that overshoots
+        # past the MLCC's x position (using board area the '+' group never
+        # touches, since '+' group's whole path stays at x <= mlcc_x) and
+        # approaches its pad from beyond it. This is topologically clean
+        # for both the "targets below all edge pads" (S90/S0 family) and
+        # "targets straddle the two edge-pad groups" (W90) cases, with no
+        # case-detection needed.
+        overshoot_x = mlcc_x + 3.0
+
+        plus_names = [n for n in EDGE_PADS if n[0] in ("DRIVE+", "SENSE+")]
+        for i, (name, edge_y) in enumerate(plus_names):
+            net_num, net_name = 1, NET_PLUS
+            width = DRIVE_TRACE_W if name == "DRIVE+" else SENSE_TRACE_W
+            sx = mlcc_x - 6 + i
             p0 = (EDGE_PAD_X, edge_y)
             p1 = (sx, edge_y)
-            p2 = (sx, target[1])
-            p3 = target
+            p2 = (sx, pad1[1])
+            p3 = pad1
+            out.append(_seg(p0, p1, width, net_num))
+            out.append(_seg(p1, p2, width, net_num))
+            out.append(_seg(p2, p3, width, net_num))
+
+        minus_names = [n for n in EDGE_PADS if n[0] in ("SENSE-", "DRIVE-")]
+        for i, (name, edge_y) in enumerate(minus_names):
+            net_num, net_name = 2, NET_MINUS
+            width = DRIVE_TRACE_W if name == "DRIVE-" else SENSE_TRACE_W
+            ox = overshoot_x + i  # distinct overshoot lane per trace
+            p0 = (EDGE_PAD_X, edge_y)
+            p1 = (ox, edge_y)
+            p2 = (ox, pad2[1])
+            p3 = pad2
             out.append(_seg(p0, p1, width, net_num))
             out.append(_seg(p1, p2, width, net_num))
             out.append(_seg(p2, p3, width, net_num))
@@ -260,8 +321,15 @@ def route_traces(pkg, mlcc_x, mlcc_y, orientation):
         # orientation 0: pads differ in X only, pad1 ('+') is nearer the edge,
         # pad2 ('-') is farther -> the '-' group must detour around pad1's
         # footprint (this is the "only where necessary" extra complexity)
+        staging_x = {name: mlcc_x - 8 + i for i, (name, _) in enumerate(EDGE_PADS)}
         pad_h = spec["pad_h"]
-        detour_y = mlcc_y + pad_h / 2 + 0.3
+        # clearance from pad1's edge to the detour trace's NEAR edge, not its
+        # centerline: half the (wider, 0.5mm) DRIVE- trace width, plus a
+        # margin above KiCad's default 0.2mm min clearance. The original
+        # 0.3mm-from-centerline version left only 0.05mm actual clearance
+        # (confirmed by real kicad-cli DRC: required 0.2mm, actual 0.05mm)
+        # because it didn't account for the trace's own half-width.
+        detour_y = mlcc_y + pad_h / 2 + DRIVE_TRACE_W / 2 + 0.3
         for name, edge_y in EDGE_PADS:
             sx = staging_x[name]
             p0 = (EDGE_PAD_X, edge_y)
@@ -311,6 +379,11 @@ def kicad_mod_mlcc(pkg):
         f'\t(descr "Local nominal IPC-7351 land pattern for {pkg}, per design/PCB_FABRICATION_SPEC.md section 4")\n'
         f'\t(pad "1" smd rect (at {-pitch/2} 0) (size {pad_w} {pad_h}) (layers "F.Cu" "F.Paste" "F.Mask"))\n'
         f'\t(pad "2" smd rect (at {pitch/2} 0) (size {pad_w} {pad_h}) (layers "F.Cu" "F.Paste" "F.Mask"))\n'
+        f'\t(model "{PACKAGE_3D_MODELS[pkg]}"\n'
+        f"\t\t(offset (xyz 0 0 0))\n"
+        f"\t\t(scale (xyz 1 1 1))\n"
+        f"\t\t(rotate (xyz 0 0 0))\n"
+        f"\t)\n"
         f")\n"
     )
 

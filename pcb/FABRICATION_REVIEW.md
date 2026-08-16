@@ -1,57 +1,38 @@
 # PCB fabrication review — v0.3.1
 
-## Environment status (read this first)
+## Environment status
 
-**KiCad is not installed in this environment.** Checked and confirmed
-absent: `kicad-cli` (and `kicad-cli8`/`kicad-cli9`) on PATH, the `pcbnew`
-Python module, `/Applications/KiCad*`, and via `brew list` / `brew list
---cask`.
+**KiCad 10.0.5 is installed** (`/Applications/KiCad/KiCad.app`,
+`kicad-cli` confirmed working) and was used as the source of truth for
+every check below: real parse/load, real DRC, real Gerber/drill export
+from the KiCad engine (not a separate custom implementation), and real
+`kicad-cli pcb render` 3D output. This supersedes the earlier v0.3.1 pass,
+which was produced before KiCad was available and explicitly marked every
+board `READY_FOR_JLCPCB: NO` for that reason.
 
-As a direct consequence, per the task's explicit instructions for this
-case:
+Two real bugs were found and fixed while validating against actual KiCad
+(not assumptions) — full detail in `design/PCB_CAD_ASSUMPTIONS.md` and
+`pcb/NET_CONNECTIVITY_REVIEW.md`:
 
-- **No board here is marked `READY_FOR_JLCPCB`.** None can be, because the
-  readiness bar requires DRC with no errors, layer-by-layer Gerber
-  inspection, and visual footprint verification — none of which are
-  possible without KiCad.
-- **No Gerbers, no Excellon drill files, and no `*_JLCPCB_Gerber.zip` were
-  generated.** Faking them (e.g. hand-writing Gerber-like text without a
-  real plotting engine) would be worse than not having them, and was not
-  done.
-- **No KiCad-rendered PNGs (top/bottom/3D/copper/mask/silk/drill plots)
-  were generated**, for the same reason. What's in each `renders/`
-  directory instead is a clearly-labeled, non-KiCad geometry
-  sanity-check diagram (see below) — explicitly not a substitute.
-- **`.kicad_pcb` board source files were still created** (5 of them, one
-  per variant), per the instruction to do this "if possible." They were
-  built by direct S-expression text generation
-  (`pcb/generate_pcb.py`), not via KiCad's own `pcbnew` API, and **have
-  never been opened or parsed by real KiCad**. Treat them as a best-effort
-  draft that needs to be opened and reviewed in actual KiCad before any
-  further step.
+1. **Rotation-convention bug**: the original routing code assumed a
+   counter-clockwise pad-rotation convention; KiCad's actual convention is
+   clockwise in its stored (x, y-down) frame. This caused the DRIVE+/
+   SENSE+ traces to land on the physical `-` pad and vice versa on every
+   90-degree board — a real short, caught by `kicad-cli pcb drc`
+   (`shorting_items`), not by the custom validator (which checked against
+   its own, equally wrong, assumption). Fixed in `mlcc_pad_positions()`.
+2. **Routing-topology bug**: after fixing (1), a *different* real crossing
+   appeared — proven analytically to have no solution using simple
+   monotonic-lane ordering, because the '+' and '-' groups' transit paths
+   mutually cross through each other's target point (worst on W90-0603,
+   where both directions conflict simultaneously). Fixed by routing the
+   '-' group (SENSE-, DRIVE-) via a detour that overshoots past the MLCC's
+   x-position, using board area the '+' group never touches.
 
-## What was done instead
+No PCB coordinates, dimensions, or package assignments from v0.3.0 were
+changed to fix either bug — both were pure routing/implementation issues.
 
-1. **`pcb/generate_pcb.py`** — builds all 5 `.kicad_pcb` files plus a local
-   footprint library (`pcb/SC4.pretty/`) directly from the same coordinate
-   data as `design/pcb_coordinates.csv`. See
-   `design/PCB_CAD_ASSUMPTIONS.md` for every fabrication parameter this
-   had to assume vs. one that was already fixed by v0.3.0.
-2. **`pcb/validate_pcb.py`** — a hand-written parser and geometry/
-   connectivity checker (**not KiCad DRC**) that checks every item in the
-   task's "Validation requirements" list against the generated files by
-   parsing their own S-expression text. Its output is saved per variant at
-   `pcb/<variant>/manufacturing/validation_report.txt`. Result: **all
-   checks pass on all 5 variants** (see table below) — this confirms the
-   generator produced internally self-consistent geometry, not that the
-   files are valid/DRC-clean KiCad files.
-3. **`pcb/generate_schematics.py`** — matplotlib diagrams (explicitly
-   filenamed `*_NOT_A_KICAD_RENDER.png`) showing board outline, holes,
-   pads, and routed traces to scale, as a visual cross-check of the same
-   coordinate data. Not a KiCad render, not photorealistic, no copper/mask
-   color accuracy — a geometry sanity check only.
-
-## Per-board record
+## Per-board record — all verified against real KiCad
 
 All 5 variants share: 100 x 40 mm outline, FR-4, 2 layers, 1.0 mm nominal
 thickness, 1 oz copper, ENIG, no copper pours, no B.Cu routing, no vias, no
@@ -62,139 +43,162 @@ onboard connectors, 4x NPTH 3.2 mm mounting holes at (5,5) (95,5) (5,35)
 
 | item | value |
 |---|---|
-| MLCC center | (50, 10) mm |
-| Orientation | 90 deg |
-| Footprint | 0402 (pad 0.6x0.6mm, pitch 1.0mm) |
-| Hole coordinates | (5,5) (95,5) (5,35) (95,35) mm, dia 3.2mm |
-| Edge-pad geometry | round, dia 2.5mm, at (5,12.5)/(5,17.5)/(5,22.5)/(5,27.5) mm |
-| Routing | direct 3-segment L-route per net (no detour needed; see PCB_CAD_ASSUMPTIONS.md item 3) |
-| Custom validator result | **PASS** (13/13 checks) |
-| Real KiCad DRC | **not run** — KiCad unavailable |
-| Gerber filenames | **not generated** |
-| Drill filename | **not generated** |
-| Board dimensions | 100 x 40 mm (confirmed from generated Edge.Cuts geometry) |
-| READY_FOR_JLCPCB | **NO** |
+| MLCC center / orientation | (50, 10) mm / 90 deg |
+| Footprint | 0402 (pad 0.6x0.6mm, pitch 1.0mm), standard KiCad 3D model attached |
+| KiCad parse | **PASS** |
+| Custom geometry validation | **PASS** (13/13) |
+| KiCad DRC errors | **0** |
+| KiCad DRC warnings | 5, all `lib_footprint_mismatch` (intentional/expected — see below) |
+| Gerber export | **PASS** (F.Cu, F.Mask, F.Silkscreen, Edge.Cuts + job file) |
+| Drill verification | **PASS** (4 NPTH @ exact coords, 0 plated holes) |
+| Visual Gerber inspection | **PASS** (per-layer + composite renders, programmatic bounds/location checks) |
+| 3D visual inspection | **PASS** (top/bottom/perspective renders) |
+| Gerber ZIP | `manufacturing/S90-0402_JLCPCB_Gerber.zip` |
+| **READY_FOR_JLCPCB** | **YES** |
 
 ### S90-0603
 
 | item | value |
 |---|---|
-| MLCC center | (50, 10) mm |
-| Orientation | 90 deg |
-| Footprint | 0603 (pad 0.9x1.0mm, pitch 1.6mm) |
-| Hole coordinates | (5,5) (95,5) (5,35) (95,35) mm, dia 3.2mm |
-| Edge-pad geometry | round, dia 2.5mm, at (5,12.5)/(5,17.5)/(5,22.5)/(5,27.5) mm |
-| Routing | direct 3-segment L-route per net |
-| Custom validator result | **PASS** (13/13 checks) |
-| Real KiCad DRC | **not run** — KiCad unavailable |
-| Gerber filenames | **not generated** |
-| Drill filename | **not generated** |
-| Board dimensions | 100 x 40 mm |
-| READY_FOR_JLCPCB | **NO** |
+| MLCC center / orientation | (50, 10) mm / 90 deg |
+| Footprint | 0603 (pad 0.9x1.0mm, pitch 1.6mm), standard KiCad 3D model attached |
+| KiCad parse | **PASS** |
+| Custom geometry validation | **PASS** (13/13) |
+| KiCad DRC errors | **0** |
+| KiCad DRC warnings | 5, all `lib_footprint_mismatch` (intentional/expected) |
+| Gerber export | **PASS** |
+| Drill verification | **PASS** (4 NPTH @ exact coords, 0 plated holes) |
+| Visual Gerber inspection | **PASS** |
+| 3D visual inspection | **PASS** |
+| Gerber ZIP | `manufacturing/S90-0603_JLCPCB_Gerber.zip` |
+| **READY_FOR_JLCPCB** | **YES** |
 
 ### S90-0805
 
 | item | value |
 |---|---|
-| MLCC center | (50, 10) mm |
-| Orientation | 90 deg |
-| Footprint | 0805 (pad 1.2x1.45mm, pitch 1.9mm) |
-| Hole coordinates | (5,5) (95,5) (5,35) (95,35) mm, dia 3.2mm |
-| Edge-pad geometry | round, dia 2.5mm, at (5,12.5)/(5,17.5)/(5,22.5)/(5,27.5) mm |
-| Routing | direct 3-segment L-route per net |
-| Custom validator result | **PASS** (13/13 checks) |
-| Real KiCad DRC | **not run** — KiCad unavailable |
-| Gerber filenames | **not generated** |
-| Drill filename | **not generated** |
-| Board dimensions | 100 x 40 mm |
-| READY_FOR_JLCPCB | **NO** |
+| MLCC center / orientation | (50, 10) mm / 90 deg |
+| Footprint | 0805 (pad 1.2x1.45mm, pitch 1.9mm), standard KiCad 3D model attached |
+| KiCad parse | **PASS** |
+| Custom geometry validation | **PASS** (13/13) |
+| KiCad DRC errors | **0** |
+| KiCad DRC warnings | 5, all `lib_footprint_mismatch` (intentional/expected) |
+| Gerber export | **PASS** |
+| Drill verification | **PASS** (4 NPTH @ exact coords, 0 plated holes) |
+| Visual Gerber inspection | **PASS** |
+| 3D visual inspection | **PASS** |
+| Gerber ZIP | `manufacturing/S90-0805_JLCPCB_Gerber.zip` |
+| **READY_FOR_JLCPCB** | **YES** |
 
 ### W90-0603
 
 | item | value |
 |---|---|
-| MLCC center | (20, 20) mm |
-| Orientation | 90 deg |
-| Footprint | 0603 (pad 0.9x1.0mm, pitch 1.6mm) |
-| Hole coordinates | (5,5) (95,5) (5,35) (95,35) mm, dia 3.2mm |
-| Edge-pad geometry | round, dia 2.5mm, at (5,12.5)/(5,17.5)/(5,22.5)/(5,27.5) mm |
-| Routing | direct 3-segment L-route per net (shorter run than S90/S0, since MLCC is closer to the edge at x=20mm) |
-| Custom validator result | **PASS** (13/13 checks) |
-| Real KiCad DRC | **not run** — KiCad unavailable |
-| Gerber filenames | **not generated** |
-| Drill filename | **not generated** |
-| Board dimensions | 100 x 40 mm |
-| READY_FOR_JLCPCB | **NO** |
+| MLCC center / orientation | (20, 20) mm / 90 deg |
+| Footprint | 0603, standard KiCad 3D model attached |
+| Routing note | this is the geometrically hardest case (targets straddle both edge-pad groups — see `NET_CONNECTIVITY_REVIEW.md`); verified crossing-free by both the custom validator's segment-intersection check and real DRC |
+| KiCad parse | **PASS** |
+| Custom geometry validation | **PASS** (13/13) |
+| KiCad DRC errors | **0** |
+| KiCad DRC warnings | 5, all `lib_footprint_mismatch` (intentional/expected) |
+| Gerber export | **PASS** |
+| Drill verification | **PASS** (4 NPTH @ exact coords, 0 plated holes) |
+| Visual Gerber inspection | **PASS** |
+| 3D visual inspection | **PASS** |
+| Gerber ZIP | `manufacturing/W90-0603_JLCPCB_Gerber.zip` |
+| **READY_FOR_JLCPCB** | **YES** |
 
 ### S0-0603
 
 | item | value |
 |---|---|
-| MLCC center | (50, 10) mm |
-| Orientation | 0 deg |
-| Footprint | 0603 (pad 0.9x1.0mm, pitch 1.6mm) |
-| Hole coordinates | (5,5) (95,5) (5,35) (95,35) mm, dia 3.2mm |
-| Edge-pad geometry | round, dia 2.5mm, at (5,12.5)/(5,17.5)/(5,22.5)/(5,27.5) mm |
-| Routing | **4-segment detour route** for SENSE-/DRIVE- (only variant needing this — see PCB_CAD_ASSUMPTIONS.md item 3) |
-| Custom validator result | **PASS** (13/13 checks) |
-| Real KiCad DRC | **not run** — KiCad unavailable |
-| Gerber filenames | **not generated** |
-| Drill filename | **not generated** |
-| Board dimensions | 100 x 40 mm |
-| READY_FOR_JLCPCB | **NO** |
+| MLCC center / orientation | (50, 10) mm / 0 deg |
+| Footprint | 0603, standard KiCad 3D model attached |
+| Routing note | only board using the pad-1-bypass detour (orientation=0 case); clearance margin was tightened after real DRC found the original 0.3mm-from-centerline margin left only 0.05mm actual clearance |
+| KiCad parse | **PASS** |
+| Custom geometry validation | **PASS** (13/13) |
+| KiCad DRC errors | **0** |
+| KiCad DRC warnings | 5, all `lib_footprint_mismatch` (intentional/expected) |
+| Gerber export | **PASS** |
+| Drill verification | **PASS** (4 NPTH @ exact coords, 0 plated holes) |
+| Visual Gerber inspection | **PASS** |
+| 3D visual inspection | **PASS** |
+| Gerber ZIP | `manufacturing/S0-0603_JLCPCB_Gerber.zip` |
+| **READY_FOR_JLCPCB** | **YES** |
 
-## Custom validator checks (all 5 variants, all pass)
+## DRC warning classification
 
-Run via `python3 pcb/validate_pcb.py`. For each variant: board dimensions,
-mounting-hole count/centers/diameter, correct MLCC footprint used, MLCC
-center/orientation exact, no vias, no copper zones, no B.Cu tracks/pad
-layers, trace widths are only 0.5mm or 0.2mm, both widths present, all 4
-labeled interface pads reach the intended MLCC terminal (net-connectivity
-check), and no two different-net F.Cu segments touch or cross anywhere
-except at their one legitimate shared MLCC-pad point.
+Every board reports exactly 5 `lib_footprint_mismatch` warnings (one for
+the MLCC footprint, four for the edge-contact footprints), after adding a
+per-board `fp-lib-table`/`.kicad_pro` resolved the *worse* "library not
+found" warning that appeared before those existed. This is **intentional
+and expected**: the warning fires because the embedded footprint instance
+(which carries net assignments, position, and a UUID) differs from the
+bare library master copy (which has none of that, by definition — a
+library part isn't wired to anything). This does not affect fabrication:
+the actual copper/pad/silkscreen geometry that gets plotted into the
+Gerbers comes entirely from the embedded instance, not the library master.
+The mounting-hole footprint (`NPTH_3.2mm`) has no such mismatch, since it
+carries no net data to differ on.
 
-**This is not KiCad DRC.** It cannot check: footprint-library validity as
-KiCad's own parser would see it, courtyard overlap, silkscreen-over-copper,
-KiCad's actual clearance/creepage rules, annular ring rules, or whether the
-file even opens in KiCad without error.
+## Gerber contents (all 5 ZIPs)
 
-## What a human needs to do next (in order)
+Exactly the 4 requested layers plus KiCad's standard Gerber job file
+(`*-job.gbrjob`, a small JSON manifest describing the layer stack — kept
+since JLCPCB and most fabs use it to auto-configure the order, not an
+"unnecessary empty layer"): `F.Cu`, `F.Mask`, `F.Silkscreen`,
+`Edge.Cuts`, plus the Excellon drill file. No other layers were exported —
+B.Cu, B.Mask, B.Silkscreen, and paste layers were confirmed empty/unused
+by design and correctly excluded.
 
-1. Install KiCad (7 or newer recommended for `kicad-cli`).
-2. Open each `pcb/<variant>/<variant>.kicad_pcb` and fix whatever the real
-   KiCad parser flags on load (expected: this file was hand-generated and
-   has never been parsed by KiCad before).
-3. Run `kicad-cli pcb drc` on each board; resolve any errors (warnings
-   should be reviewed and summarized, per the task brief) before proceeding.
-4. Visually inspect each board in KiCad's 3D viewer and 2D editor —
-   specifically confirm MLCC footprint position/orientation, edge-pad
-   placement/clearance from the mounting holes, and that the DRIVE+/SENSE+
-   and DRIVE-/SENSE- merged-net simplification (`PCB_CAD_ASSUMPTIONS.md`
-   item 4) is acceptable, or upgrade it to a proper 4-net + net-tie
-   implementation.
-5. Export Gerbers (F.Cu, F.Mask, F.Silkscreen, Edge.Cuts, plus any other
-   layer that turns out to actually carry data) and Excellon drill files
-   from KiCad directly — not from a separate custom geometry
-   implementation, per the task brief.
-6. Zip exactly the fabrication-needed files into
-   `pcb/<variant>/manufacturing/<variant>_JLCPCB_Gerber.zip`.
-7. Only after steps 3-6 are clean should any board be marked
-   `READY_FOR_JLCPCB`.
+## Visual verification artifacts
+
+Per variant, under `<variant>/renders/`:
+- `<variant>_top.png`, `<variant>_bottom.png`, `<variant>_perspective.png` —
+  real `kicad-cli pcb render` 3D output (high quality, floor/shadows on).
+  Bottom view confirms bare substrate (no bottom copper); top/perspective
+  confirm MLCC position, orientation, and package size visually, with a
+  standard KiCad 3D body attached per package (0402/0603/0805) so the part
+  is actually visible, not just its footprint outline.
+
+Per variant, under `<variant>/manufacturing/gerber_verification/`:
+- Per-layer PNGs (top copper, solder mask, silkscreen, edge cuts) plus a
+  composite, rendered from the **actual exported Gerber files** via
+  `kicad-cli pcb export svg` (the same plot engine that generated the
+  Gerbers) converted to PNG — not re-renders of the source PCB.
+
+`pcb/PCB_5_VARIANT_COMPARISON.png` — all 5 top-view renders at identical
+camera/zoom settings, stacked and labeled for direct scale comparison.
 
 ## Files in this directory
 
 ```
 pcb/
-├── generate_pcb.py                        generator (source of truth for all 5 boards)
-├── validate_pcb.py                        custom geometry/connectivity checker (not KiCad DRC)
-├── generate_schematics.py                 non-KiCad geometry sanity-check diagrams
-├── PCB_5_VARIANT_LAYOUT_SCHEMATIC_NOT_A_KICAD_RENDER.png
-├── FABRICATION_REVIEW.md                  this file
-├── SC4.pretty/                            local footprint library (.kicad_mod files)
+├── generate_pcb.py                  generator (source of truth for all 5 boards)
+├── validate_pcb.py                  custom geometry/connectivity checker (pre-check, not a DRC substitute)
+├── verify_gerbers.py                Gerber-file rendering + programmatic verification (Step 6)
+├── render_3d.py                     kicad-cli pcb render driver (Step 7)
+├── make_comparison.py               builds PCB_5_VARIANT_COMPARISON.png
+├── generate_schematics.py           earlier (pre-KiCad) non-KiCad sanity diagrams, superseded by real renders
+├── PCB_5_VARIANT_COMPARISON.png
+├── FABRICATION_REVIEW.md            this file
+├── NET_CONNECTIVITY_REVIEW.md       Step 3 net-model review
+├── SC4.pretty/                      local footprint library (.kicad_mod files)
 └── <variant>/
-    ├── <variant>.kicad_pcb                board source, unvalidated by real KiCad
+    ├── <variant>.kicad_pcb          board source, real-KiCad validated
+    ├── <variant>.kicad_pro          minimal project file (enables fp-lib-table resolution)
+    ├── fp-lib-table                 points the project at ../SC4.pretty
     ├── manufacturing/
-    │   └── validation_report.txt          custom validator output (not DRC)
+    │   ├── validation_report.txt              custom validator output
+    │   ├── drc_report.txt                     real kicad-cli DRC report
+    │   ├── drill_report.txt                   real kicad-cli drill report
+    │   ├── gerbers/                            raw exported Gerber + drill files
+    │   ├── gerber_verification/                per-layer + composite PNGs, from the actual Gerbers
+    │   ├── gerber_verification_report.txt      programmatic Gerber checks
+    │   └── <variant>_JLCPCB_Gerber.zip         fabrication deliverable
     └── renders/
-        └── <variant>_layout_schematic_NOT_A_KICAD_RENDER.png
+        └── <variant>_top.png, _bottom.png, _perspective.png
 ```
+
+See `pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md` for the top-level summary
+of this entire package.

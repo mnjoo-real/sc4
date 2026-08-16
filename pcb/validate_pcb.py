@@ -100,15 +100,17 @@ def parse_segments(text):
 
 def pad_world_xy(fp, pad):
     """Rotate a footprint-local pad offset by the footprint's placement angle
-    and translate by the footprint's (at x y) -- matches KiCad's own
-    convention (rotation is counter-clockwise for positive angles in KiCad's
-    board Y-down frame; since our footprints only use 0/90 deg this is exact
-    either way for the axis-aligned cases we use)."""
+    and translate by the footprint's (at x y). KiCad's actual convention
+    (confirmed against real `kicad-cli pcb drc` output, not assumed): positive
+    angle rotates CLOCKWISE in the stored (x, y-down) frame. An earlier CCW
+    assumption here (and in generate_pcb.py's mlcc_pad_positions) produced
+    real DRIVE+/DRIVE- shorts on every 90-deg board; see
+    pcb/NET_CONNECTIVITY_REVIEW.md."""
     fx, fy, frot = fp["at"]
     lx, ly = pad["local_xy"]
     theta = math.radians(frot)
-    wx = fx + lx * math.cos(theta) - ly * math.sin(theta)
-    wy = fy + lx * math.sin(theta) + ly * math.cos(theta)
+    wx = fx + lx * math.cos(theta) + ly * math.sin(theta)
+    wy = fy - lx * math.sin(theta) + ly * math.cos(theta)
     return round(wx, 3), round(wy, 3)
 
 

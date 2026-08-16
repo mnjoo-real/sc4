@@ -1,0 +1,15 @@
+Gerber verification report for W90-0603
+
+Layer renders (from actual exported Gerbers via kicad-cli pcb export svg):
+  [OK] top_copper
+  [OK] solder_mask
+  [OK] silkscreen
+  [OK] edge_cuts
+  [OK] composite_top
+
+Programmatic checks (parsed directly from the Gerber/drill files):
+[PASS] gerber_outline_100x40mm  {'x_min': 0.0, 'x_max': 100.0, 'y_min': -4.6e-05, 'y_max': 40.0}
+[PASS] drill_centers_exact  got [(5.0, 5.0), (5.0, 35.0), (95.0, 5.0), (95.0, 35.0)], expected [(5.0, 5.0), (5.0, 35.0), (95.0, 5.0), (95.0, 35.0)]
+[PASS] no_copper_outside_board  {'x_min': 4.6e-05, 'x_max': 24.0, 'y_min': -4.6e-05, 'y_max': 27.5}
+[PASS] mlcc_location_in_gerber  pad1=(20.0, 20.8) pad2=(20.0, 19.2)
+[PASS] no_missing_trace_gerber_nonempty  30 coord ops

@@ -1,0 +1,33 @@
+** Drc report for S90-0402.kicad_pcb **
+** Created on 2026-08-16T15:55:27 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 5 DRC violations **
+[lib_footprint_mismatch]: 풋프린트 'C_0402_Local'이(가) 라이브러리 'SC4'의 사본과 일치하지 않습니다
+    Local override; warning
+    @(50.0000 mm, 10.0000 mm): 풋프린트 MLCC1
+[lib_footprint_mismatch]: 풋프린트 'EdgeContact_2.5mm_Round'이(가) 라이브러리 'SC4'의 사본과 일치하지 않습니다
+    Local override; warning
+    @(5.0000 mm, 12.5000 mm): 풋프린트 DRIVE+
+[lib_footprint_mismatch]: 풋프린트 'EdgeContact_2.5mm_Round'이(가) 라이브러리 'SC4'의 사본과 일치하지 않습니다
+    Local override; warning
+    @(5.0000 mm, 17.5000 mm): 풋프린트 SENSE+
+[lib_footprint_mismatch]: 풋프린트 'EdgeContact_2.5mm_Round'이(가) 라이브러리 'SC4'의 사본과 일치하지 않습니다
+    Local override; warning
+    @(5.0000 mm, 22.5000 mm): 풋프린트 SENSE-
+[lib_footprint_mismatch]: 풋프린트 'EdgeContact_2.5mm_Round'이(가) 라이브러리 'SC4'의 사본과 일치하지 않습니다
+    Local override; warning
+    @(5.0000 mm, 27.5000 mm): 풋프린트 DRIVE-
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **
