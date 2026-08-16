@@ -1,0 +1,7 @@
+(footprint "NPTH_3.2mm"
+	(version 20221018)
+	(generator "sc4-modeling-generate_pcb.py")
+	(layer "F.Cu")
+	(descr "Non-plated 3.2mm mounting hole, per design/PCB_FABRICATION_SPEC.md section 3")
+	(pad "1" np_thru_hole circle (at 0 0) (size 3.2 3.2) (drill 3.2) (layers "*.Cu" "*.Mask"))
+)

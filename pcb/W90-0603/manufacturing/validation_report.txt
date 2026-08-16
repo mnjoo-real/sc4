@@ -1,0 +1,18 @@
+Custom geometry validator report for W90-0603
+NOT KiCad DRC -- kicad-cli/pcbnew unavailable in this environment.
+
+[PASS] board_dimensions_100x40mm  x:[0.0,100.0] y:[0.0,40.0]
+[PASS] mounting_hole_count  found 4
+[PASS] mounting_hole_centers_exact  got [(5.0, 5.0), (5.0, 35.0), (95.0, 5.0), (95.0, 35.0)], expected [(5.0, 5.0), (5.0, 35.0), (95.0, 5.0), (95.0, 35.0)]
+[PASS] mounting_hole_diameter_3.2mm  [('3.2', '3.2', '3.2'), ('3.2', '3.2', '3.2'), ('3.2', '3.2', '3.2'), ('3.2', '3.2', '3.2')]
+[PASS] mlcc_correct_footprint_used  found ['SC4:C_0603_Local']
+[PASS] mlcc_center_exact  got (20.0,20.0) expected (20.0,20.0)
+[PASS] mlcc_orientation_exact  got 90.0 expected 90
+[PASS] no_vias  found 0
+[PASS] no_copper_zones  found 0
+[PASS] no_bcu_tracks  found 0
+[PASS] no_bcu_in_pad_layers  found 0
+[PASS] trace_widths_only_0.5_or_0.2mm  widths found: [0.2, 0.5]
+[PASS] drive_and_sense_segments_present  0.5mm segs=6, 0.2mm segs=6
+[PASS] four_interface_pads_reach_intended_mlcc_terminal  DRIVE+->net1 vs MLCC(+)->net1 OK; SENSE+->net1 vs MLCC(+)->net1 OK; SENSE-->net2 vs MLCC(-)->net2 OK; DRIVE-->net2 vs MLCC(-)->net2 OK
+[PASS] no_unintended_cross_net_shorts  conflicting segment pairs: 0

@@ -1,0 +1,7 @@
+(footprint "EdgeContact_2.5mm_Round"
+	(version 20221018)
+	(generator "sc4-modeling-generate_pcb.py")
+	(layer "F.Cu")
+	(descr "Round hand-solder edge contact pad, assumption per design/PCB_CAD_ASSUMPTIONS.md")
+	(pad "1" smd circle (at 0 0) (size 2.5 2.5) (layers "F.Cu" "F.Mask"))
+)

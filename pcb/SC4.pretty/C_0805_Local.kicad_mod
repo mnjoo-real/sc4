@@ -1,0 +1,8 @@
+(footprint "C_0805_Local"
+	(version 20221018)
+	(generator "sc4-modeling-generate_pcb.py")
+	(layer "F.Cu")
+	(descr "Local nominal IPC-7351 land pattern for 0805, per design/PCB_FABRICATION_SPEC.md section 4")
+	(pad "1" smd rect (at -0.95 0) (size 1.2 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+	(pad "2" smd rect (at 0.95 0) (size 1.2 1.45) (layers "F.Cu" "F.Paste" "F.Mask"))
+)
