@@ -1,0 +1,6 @@
+variant,board_role,purpose,pcb_length_mm,pcb_width_mm,pcb_thickness_mm,material,layer_count,copper_weight_oz,surface_finish,footprint,orientation_deg,mounting_holes,min_order_qty
+S90-0402,S90,primary strong-response board; MLCC-package-size check,100,40,1.0,FR-4,2,1,ENIG,0402,90,"4x 3.2mm NPTH at (5,5) (95,5) (5,35) (95,35) mm",5
+S90-0603,S90,primary strong-response board; reference-footprint candidate testing,100,40,1.0,FR-4,2,1,ENIG,0603,90,"4x 3.2mm NPTH at (5,5) (95,5) (5,35) (95,35) mm",5
+S90-0805,S90,primary strong-response board; MLCC-package-size check,100,40,1.0,FR-4,2,1,ENIG,0805,90,"4x 3.2mm NPTH at (5,5) (95,5) (5,35) (95,35) mm",5
+W90-0603,W90,position-control board; reference MLCC only,100,40,1.0,FR-4,2,1,ENIG,0603,90,"4x 3.2mm NPTH at (5,5) (95,5) (5,35) (95,35) mm",5
+S0-0603,S0,orientation-control board; reference MLCC only,100,40,1.0,FR-4,2,1,ENIG,0603,0,"4x 3.2mm NPTH at (5,5) (95,5) (5,35) (95,35) mm",5

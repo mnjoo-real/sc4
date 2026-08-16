@@ -1,0 +1,24 @@
+setting,value,notes
+Base Material,FR-4,shared across all 5 variants
+Layers,2,shared across all 5 variants
+Dimensions,100 x 40 mm,shared board outline across all 5 variants
+PCB Thickness,1.0 mm,shared across all 5 variants
+Outer Copper Weight,1 oz,~35 micron nominal; shared across all 5 variants
+Surface Finish,ENIG,shared across all 5 variants
+Via Covering,N/A - no vias in this design,confirm in EDA tool that layout has zero vias before ordering
+Min Via Hole Size,N/A,no vias in this design
+Copper Pours,none,do not add ground/power planes; see PCB_FABRICATION_SPEC.md section 6
+Bottom Layer Copper,none,top-layer routing only; see PCB_FABRICATION_SPEC.md section 6
+Mounting Holes,4x 3.2 mm NPTH (non-plated),"locations (5,5) (95,5) (5,35) (95,35) mm; identical on all 5 variants"
+Board Outline Tolerance,manufacturer standard (~+/-0.2 mm typical),reconfirm against chosen fab's current capability at order time
+Solder Mask Color,manufacturer default (open decision),cosmetic; does not affect the experiment
+Silkscreen Color,manufacturer default (open decision),cosmetic; keep silkscreen within edge keepout strip per spec section 7
+Silkscreen Content,variant ID only (e.g. S90-0603) within x<=15mm edge strip,no logos/outlines/revision text in the active region
+Gold Fingers,No,
+Castellated Holes,No,
+Flying Probe / E-test,manufacturer default,
+Panelization,No - order each variant as single (non-panelized) boards,avoids panel breakout tabs adding uncontrolled mass/stiffness at the board edge
+PCB Qty per variant,see pcb_quantity_plan.csv,each of the 5 variants is a separate unique design/order line
+Min Trace/Space Capability Check,design uses 0.5 mm (drive) / 0.2 mm (sense); typical 2-layer capability ~0.09-0.15 mm,comfortable margin; reconfirm min spacing once traces are routed in EDA
+Min NPTH Hole Size Capability Check,design uses 3.2 mm; typical min NPTH ~0.3 mm,comfortable margin
+Production File Confirmation,do not submit until layout has been visually reviewed in EDA tool,see PCB_FABRICATION_SPEC.md "Status" section

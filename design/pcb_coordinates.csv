@@ -1,4 +1,6 @@
-variant,purpose,pcb_length_mm,pcb_width_mm,pcb_thickness_mm,mlcc_x_mm,mlcc_y_mm,mlcc_x_frac,mlcc_y_frac,orientation_deg
-S90,primary strong-response board,100,40,1.0,50,10,0.50,0.25,90
-W90,position-control board,100,40,1.0,20,20,0.20,0.50,90
-S0,orientation-control board,100,40,1.0,50,10,0.50,0.25,0
+variant,board_role,footprint,pcb_length_mm,pcb_width_mm,pcb_thickness_mm,mlcc_x_mm,mlcc_y_mm,mlcc_x_frac,mlcc_y_frac,orientation_deg,pad_pitch_mm,pad1_x_mm,pad1_y_mm,pad2_x_mm,pad2_y_mm
+S90-0402,S90,0402,100,40,1.0,50,10,0.50,0.25,90,1.0,50,9.5,50,10.5
+S90-0603,S90,0603,100,40,1.0,50,10,0.50,0.25,90,1.6,50,9.2,50,10.8
+S90-0805,S90,0805,100,40,1.0,50,10,0.50,0.25,90,1.9,50,9.05,50,10.95
+W90-0603,W90,0603,100,40,1.0,20,20,0.20,0.50,90,1.6,20,19.2,20,20.8
+S0-0603,S0,0603,100,40,1.0,50,10,0.50,0.25,0,1.6,49.2,10,50.8,10

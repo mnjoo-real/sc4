@@ -1,0 +1,6 @@
+variant,board_role,min_fab_order_qty,planned_order_qty,reserved_validation,reserved_spares_rework,reserved_candidate_testing,notes
+S90-0402,S90,5,5,1,2,2,scale up later if multiple 0402 candidates are selected
+S90-0603,S90,5,5,1,1,3,0603 is the likely reference-MLCC footprint; expected heaviest use of the three S90 variants
+S90-0805,S90,5,5,1,2,2,scale up later if multiple 0805 candidates are selected
+W90-0603,W90,5,5,3,2,0,position-control only; reserved_validation covers broad + repeated dense sweeps with the reference MLCC; not used for candidate testing per design
+S0-0603,S0,5,5,3,2,0,orientation-control only; reserved_validation covers broad + repeated dense sweeps with the reference MLCC; not used for candidate testing per design
