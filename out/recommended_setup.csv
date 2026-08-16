@@ -1,0 +1,11 @@
+parameter,recommended value
+PCB length,100 mm
+PCB width,40 mm
+PCB thickness,0.8 mm
+MLCC x-position,x/a = 0.50
+MLCC y-position,y/b = 0.25
+MLCC orientation,90 deg
+main frequency range,200-3000 Hz
+resonance frequencies,"439, 872, 919, 1834"
+strong-response condition,"x/a=0.50, y/b=0.25, orientation=90 deg (peak=171)"
+control condition,"x/a=0.20, y/b=0.50, orientation=90 deg (peak=38.1)"
