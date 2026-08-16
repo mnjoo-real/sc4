@@ -124,8 +124,10 @@ def _plot_geometry_sweep(df: pd.DataFrame, base: Params, out_dir: str):
 # ---------------------------------------------------------------- position
 
 
-def sweep_position(params: Params, out_dir: str = OUT_DIR):
-    """Scan MLCC position and orientation for a fixed PCB geometry."""
+def compute_position_scan(params: Params) -> pd.DataFrame:
+    """Grid scan of MLCC position and orientation for a fixed PCB geometry,
+    with no plotting side effects (reused by run_sweep and pcb_selection).
+    """
     freqs = np.linspace(params.f_min, params.f_max, params.n_freq_points)
 
     records = []
@@ -135,7 +137,12 @@ def sweep_position(params: Params, out_dir: str = OUT_DIR):
         peak = float(np.max(np.maximum(result["resp_f"], result["resp_2f"])))
         records.append(dict(x_frac=x_frac, y_frac=y_frac, orientation=orientation, peak=peak))
 
-    df = pd.DataFrame(records)
+    return pd.DataFrame(records)
+
+
+def sweep_position(params: Params, out_dir: str = OUT_DIR):
+    """Scan MLCC position and orientation for a fixed PCB geometry."""
+    df = compute_position_scan(params)
     _plot_position_map(df, out_dir)
     _plot_orientation(df, out_dir)
 

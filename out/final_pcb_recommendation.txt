@@ -1,0 +1,57 @@
+Final PCB recommendation
+=========================
+
+Reduced-order model only (isotropic simply-supported thin plate, lumped
+MLCC source at f and 2f, per README.md). No FEM, acoustic radiation model,
+or detailed solder / MLCC-layer physics was used for this decision -- see
+pcb_candidate_comparison.csv for the full candidate comparison and
+fig6_pcb_robustness.png for the uncertainty sweep behind it.
+
+Recommended PCB geometry:
+  length    = 100 mm
+  width     = 40 mm
+  thickness = 1 mm
+
+Recommended strong-response MLCC position and orientation:
+  x/a=0.50, y/b=0.25, 90 deg
+
+Recommended weak-control MLCC position:
+  x/a=0.20, y/b=0.50, 90 deg
+
+Main resonance frequencies to target experimentally (Hz):
+  1090, 1541, 2293
+  (adjacent spacings: 451, 752 Hz; minimum spacing 451 Hz)
+
+Electrical excitation frequency intervals to scan more densely
+(around each in-range resonance, and around half that frequency since
+the second harmonic 2f can also excite it there):
+  463-627 Hz
+  655-886 Hz
+  926-1772 Hz
+  1949-2637 Hz
+
+Predicted strong/control response ratio: 4.89x
+Predicted 0 deg vs 90 deg orientation response ratio: 1.77x (better orientation: 90 deg) -- useful (worth including as an experimental variable)
+
+Robustness under uncertainty sweep (E_pcb +/-20%, damping in {0.01,0.02,0.04},
+MLCC placement +/-1 mm):
+  resonance-count stability : 1.00 (fraction of in-range resonances retained under +/-20% E_pcb)
+  damping peak retention    : 0.25 (peak response at damping=0.04 relative to damping=0.01)
+  placement sensitivity     : 0.05 (relative std of peak response under +/-1 mm placement error; lower is more robust)
+
+Why this PCB was selected over the alternatives:
+
+- selected: 100x40x1mm: 3 resonances (1090, 1541, 2293 Hz), min spacing 451 Hz, strong/control ratio 4.89x, orientation ratio 1.77x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+- alternative: 100x40x0.8mm: 4 resonances (872, 1233, 1835, 2677 Hz), min spacing 361 Hz, strong/control ratio 4.48x, orientation ratio 1.76x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+- alternative: 100x30x1.6mm: 1 resonance (2914 Hz), min spacing n/a, strong/control ratio 90.45x, orientation ratio 6.95x, resonance-count stability 0.00, damping peak retention 0.25, placement sensitivity 0.07
+- alternative: 60x30x1mm: 1 resonance (2088 Hz), min spacing n/a, strong/control ratio 45.85x, orientation ratio 5.35x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.07
+- alternative: 80x40x1.6mm: 1 resonance (1880 Hz), min spacing n/a, strong/control ratio 20.67x, orientation ratio 1.61x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+- alternative: 60x40x1.6mm: 1 resonance (2172 Hz), min spacing n/a, strong/control ratio 31.57x, orientation ratio 4.81x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+
+100x40x0.8mm vs 100x40x1.0mm (the two boards directly under comparison):
+  0.8 mm (rank 2): 100x40x0.8mm: 4 resonances (872, 1233, 1835, 2677 Hz), min spacing 361 Hz, strong/control ratio 4.48x, orientation ratio 1.76x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+  1.0 mm (rank 1): 100x40x1mm: 3 resonances (1090, 1541, 2293 Hz), min spacing 451 Hz, strong/control ratio 4.89x, orientation ratio 1.77x, resonance-count stability 1.00, damping peak retention 0.25, placement sensitivity 0.05
+  This overturns the earlier resonance-count-only pick: the 1.0 mm board gives
+  a weaker resonance count but a better strong/control contrast and/or more
+  robust behavior under the uncertainty sweep, which matters more for a clean
+  experimental demonstration.
