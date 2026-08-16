@@ -1,0 +1,4 @@
+variant,purpose,pcb_length_mm,pcb_width_mm,pcb_thickness_mm,mlcc_x_mm,mlcc_y_mm,mlcc_x_frac,mlcc_y_frac,orientation_deg
+S90,primary strong-response board,100,40,1.0,50,10,0.50,0.25,90
+W90,position-control board,100,40,1.0,20,20,0.20,0.50,90
+S0,orientation-control board,100,40,1.0,50,10,0.50,0.25,0
