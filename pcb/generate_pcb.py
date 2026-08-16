@@ -36,10 +36,11 @@ PACKAGES = {
 
 # Standard KiCad-shipped 3D models, used for visual rendering only (Step 7).
 # Does NOT change footprint pads/electrical definition -- see
-# design/PCB_CAD_ASSUMPTIONS.md. Path is this machine's KiCad install
-# location; portable installs should use ${KICAD9_3DMODEL_DIR}-style env
-# vars instead if moving to a different machine/KiCad version.
-KICAD_3D_BASE = "/Applications/KiCad/KiCad.app/Contents/SharedSupport/3dmodels"
+# design/PCB_CAD_ASSUMPTIONS.md. Uses KiCad's own built-in environment
+# variable (confirmed present in this KiCad 10.0.5 install's own shipped
+# footprint libraries, e.g. TerminalBlock_WAGO.pretty), so this resolves
+# correctly on any KiCad 10.x install, not just this machine.
+KICAD_3D_BASE = "${KICAD10_3DMODEL_DIR}"
 PACKAGE_3D_MODELS = {
     "0402": f"{KICAD_3D_BASE}/Capacitor_SMD.3dshapes/C_0402_1005Metric.step",
     "0603": f"{KICAD_3D_BASE}/Capacitor_SMD.3dshapes/C_0603_1608Metric.step",
