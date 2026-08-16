@@ -54,8 +54,8 @@ Commercial MLCC datasheets generally do not provide all of the following:
 - dielectric-layer thickness,
 - number of active layers,
 - active-region geometry,
-- \(d_{31}\), \(d_{33}\),
-- \(M_{31}\), \(M_{33}\),
+- $d_{31}$, $d_{33}$,
+- $M_{31}$, $M_{33}$,
 - effective electromechanical source moment.
 
 If a required parameter is not available from a literature benchmark or an explicitly provided dataset:
@@ -166,18 +166,18 @@ Use this paper primarily for **Model A**.
 
 Relevant concepts:
 
-- BaTiO\(_3\)-based MLCC strain modeled as the sum of piezoelectric and electrostrictive contributions.
+- BaTiO$_3$-based MLCC strain modeled as the sum of piezoelectric and electrostrictive contributions.
 - Separation of the fundamental and second-harmonic strain components under combined AC and DC excitation.
 - Effective piezoelectric coefficient under DC bias.
 - Relationship between MLCC body deformation, solder reaction forces, and PCB vibration.
 - Importance of PCB mode shape and MLCC structural geometry.
 - Reference MLCC:
   - X5R
-  - \(10\,\mu\text{F}\)
+  - $10\,\mu\text{F}$
   - 0402 / 1005 metric
-  - body dimensions approximately \(1.0 \times 0.5 \times 0.5\) mm.
+  - body dimensions approximately $1.0 \times 0.5 \times 0.5$ mm.
 - Reference PCB geometry:
-  - \(100 \times 40 \times 1\) mm.
+  - $100 \times 40 \times 1$ mm.
 
 This paper is the primary source for the electromechanical equations in Sections 4–7.
 
@@ -274,33 +274,33 @@ Therefore, `position` and `orientation` must be explicit sweep variables.
 
 Model the applied voltage as
 
-\[
+$$
 V(t)
 =
 V_{\mathrm{DC}}
 +
 V_{\mathrm{AC}}\cos(\omega t).
-\]
+$$
 
-If the effective dielectric-layer thickness is \(t_d\),
+If the effective dielectric-layer thickness is $t_d$,
 
-\[
+$$
 E(t)=\frac{V(t)}{t_d}.
-\]
+$$
 
 Thus,
 
-\[
+$$
 E(t)
 =
 E_{\mathrm{DC}}
 +
 E_{\mathrm{AC}}\cos(\omega t),
-\]
+$$
 
 where
 
-\[
+$$
 E_{\mathrm{DC}}
 =
 \frac{V_{\mathrm{DC}}}{t_d},
@@ -308,11 +308,11 @@ E_{\mathrm{DC}}
 E_{\mathrm{AC}}
 =
 \frac{V_{\mathrm{AC}}}{t_d}.
-\]
+$$
 
 ### Important limitation
 
-For a commercial MLCC, \(t_d\) is often unavailable from the datasheet.
+For a commercial MLCC, $t_d$ is often unavailable from the datasheet.
 
 Therefore, absolute electric-field prediction must only be used when:
 
@@ -329,22 +329,22 @@ Do not infer dielectric-layer thickness from package dimensions.
 
 Kim et al. (2019) use the strain model
 
-\[
+$$
 \boxed{
 S=dE+ME^2
 }
-\]
+$$
 
 where:
 
-- \(S\): mechanical strain,
-- \(E\): electric field,
-- \(d\): piezoelectric coefficient,
-- \(M\): electrostrictive coefficient.
+- $S$: mechanical strain,
+- $E$: electric field,
+- $d$: piezoelectric coefficient,
+- $M$: electrostrictive coefficient.
 
 Substituting the combined DC and AC electric field gives
 
-\[
+$$
 S(t)
 =
 d
@@ -356,22 +356,22 @@ M
 \left(
 E_{\mathrm{DC}}+E_{\mathrm{AC}}\cos\omega t
 \right)^2.
-\]
+$$
 
 Using
 
-\[
+$$
 \cos^2\omega t
 =
 \frac12
 \left(
 1+\cos2\omega t
 \right),
-\]
+$$
 
 the strain can be written as
 
-\[
+$$
 \boxed{
 S(t)
 =
@@ -381,11 +381,11 @@ A_1\cos\omega t
 +
 A_2\cos2\omega t
 }
-\]
+$$
 
 with
 
-\[
+$$
 S_0
 =
 dE_{\mathrm{DC}}
@@ -393,9 +393,9 @@ dE_{\mathrm{DC}}
 ME_{\mathrm{DC}}^2
 +
 \frac12ME_{\mathrm{AC}}^2,
-\]
+$$
 
-\[
+$$
 \boxed{
 A_1
 =
@@ -404,17 +404,17 @@ d+2ME_{\mathrm{DC}}
 \right)
 E_{\mathrm{AC}}
 }
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 A_2
 =
 \frac12ME_{\mathrm{AC}}^2.
 }
-\]
+$$
 
 ---
 
@@ -422,16 +422,16 @@ A_2
 
 ## 6.1 Fundamental component
 
-The component at the excitation frequency \(f\) has amplitude
+The component at the excitation frequency $f$ has amplitude
 
-\[
+$$
 A_1
 =
 \left(
 d+2ME_{\mathrm{DC}}
 \right)
 E_{\mathrm{AC}}.
-\]
+$$
 
 Therefore, the fundamental contains both:
 
@@ -440,31 +440,31 @@ Therefore, the fundamental contains both:
 
 At fixed material parameters and DC bias, the first-order model predicts approximately
 
-\[
+$$
 A_1 \propto E_{\mathrm{AC}}.
-\]
+$$
 
 ---
 
 ## 6.2 Second harmonic
 
-The component at \(2f\) has amplitude
+The component at $2f$ has amplitude
 
-\[
+$$
 A_2
 =
 \frac12ME_{\mathrm{AC}}^2.
-\]
+$$
 
 Within this model, the second harmonic originates from electrostriction.
 
 The expected scaling is
 
-\[
+$$
 A_2 \propto E_{\mathrm{AC}}^2.
-\]
+$$
 
-This makes the \(2f\) component particularly useful for checking whether the nonlinear electromechanical model has been implemented correctly.
+This makes the $2f$ component particularly useful for checking whether the nonlinear electromechanical model has been implemented correctly.
 
 ---
 
@@ -472,21 +472,21 @@ This makes the \(2f\) component particularly useful for checking whether the non
 
 For a fixed DC bias, define
 
-\[
+$$
 \boxed{
 d_{\mathrm{eff}}
 =
 d+2ME_{\mathrm{DC}}.
 }
-\]
+$$
 
 Then
 
-\[
+$$
 A_1
 =
 d_{\mathrm{eff}}E_{\mathrm{AC}}.
-\]
+$$
 
 This quantity should be implemented explicitly because it is useful for plotting and for interpreting DC-bias sweeps.
 
@@ -505,21 +505,21 @@ An MLCC should not be modeled as a body that expands and contracts isotropically
 
 If the dielectric electric-field direction is treated as axis 3, directional strains may be written schematically as
 
-\[
+$$
 S_3
 =
 d_{33}E
 +
 M_{33}E^2,
-\]
+$$
 
-\[
+$$
 S_1
 =
 d_{31}E
 +
 M_{31}E^2.
-\]
+$$
 
 The first reduced-order implementation should therefore support at least two deformation channels:
 
@@ -530,7 +530,7 @@ S_L : longitudinal/head-direction strain
 
 These channels may initially be normalized or parameterized independently.
 
-Do not assume numerical values for \(d_{31}\), \(d_{33}\), \(M_{31}\), or \(M_{33}\) unless they are explicitly provided.
+Do not assume numerical values for $d_{31}$, $d_{33}$, $M_{31}$, or $M_{33}$ unless they are explicitly provided.
 
 ---
 
@@ -554,15 +554,15 @@ d_eff
 
 where
 
-\[
+$$
 H2\_H1
 =
 \left|
 \frac{A_2}{A_1}
 \right|.
-\]
+$$
 
-Handle \(A_1 \approx 0\) safely.
+Handle $A_1 \approx 0$ safely.
 
 Do not allow divide-by-zero warnings to silently propagate into ranking logic.
 
@@ -582,29 +582,29 @@ The preferred reduced-order abstraction is an **equivalent moment pair**.
 
 A source-model identification relation may be written as
 
-\[
+$$
 \boxed{
 M_{\mathrm{eq}}
 =
 \frac{v_m}{v_s}
 M_{\mathrm{unit}}
 }
-\]
+$$
 
 where:
 
-- \(v_m\): measured PCB velocity with the real MLCC,
-- \(v_s\): simulated PCB velocity under a known unit moment,
-- \(M_{\mathrm{unit}}\): known simulated unit moment,
-- \(M_{\mathrm{eq}}\): identified equivalent MLCC moment.
+- $v_m$: measured PCB velocity with the real MLCC,
+- $v_s$: simulated PCB velocity under a known unit moment,
+- $M_{\mathrm{unit}}$: known simulated unit moment,
+- $M_{\mathrm{eq}}$: identified equivalent MLCC moment.
 
-Before hardware measurements exist, \(v_m\) is unavailable.
+Before hardware measurements exist, $v_m$ is unavailable.
 
 Therefore, pre-purchase simulation must support two source modes.
 
 ## Mode B1 — Normalized physics source
 
-Use a configurable mapping from Model-A quantities such as \(A_1\) and \(A_2\) to normalized source magnitudes.
+Use a configurable mapping from Model-A quantities such as $A_1$ and $A_2$ to normalized source magnitudes.
 
 Example conceptual mapping:
 
@@ -627,17 +627,17 @@ Do not treat coefficients from one capacitor family as universal.
 
 A convenient source structure is
 
-\[
+$$
 M(V_{\mathrm{DC}},f)
 =
 a(V_{\mathrm{DC}})f
 +
 b(V_{\mathrm{DC}}).
-\]
+$$
 
 With a reference AC amplitude,
 
-\[
+$$
 \boxed{
 M
 \left(
@@ -654,7 +654,7 @@ a(V_{\mathrm{DC}})f
 b(V_{\mathrm{DC}})
 \right].
 }
-\]
+$$
 
 The implementation should represent `a(Vdc)` and `b(Vdc)` as configurable functions or interpolation tables.
 
@@ -682,17 +682,17 @@ The two solder terminations can form a force couple, generating a rotational mom
 
 A simple conceptual approximation is
 
-\[
+$$
 M_{\mathrm{eq}}
 \approx
 F_{\mathrm{eq}}
 d_{\mathrm{pad}},
-\]
+$$
 
 where:
 
-- \(F_{\mathrm{eq}}\): equivalent force magnitude,
-- \(d_{\mathrm{pad}}\): separation between the effective force locations.
+- $F_{\mathrm{eq}}$: equivalent force magnitude,
+- $d_{\mathrm{pad}}$: separation between the effective force locations.
 
 This is one reason package geometry and orientation can alter PCB coupling.
 
@@ -704,7 +704,7 @@ The package size itself is not sufficient to determine the true source strength.
 
 Represent the PCB as a damped mechanical system:
 
-\[
+$$
 \boxed{
 [M]\ddot{u}
 +
@@ -714,15 +714,15 @@ Represent the PCB as a damped mechanical system:
 =
 F.
 }
-\]
+$$
 
 Modal analysis is based on
 
-\[
+$$
 \boxed{
 ([K]-\omega_n^2[M])\phi_n=0.
 }
-\]
+$$
 
 For each mode, determine:
 
@@ -755,18 +755,18 @@ nu     effective Poisson ratio
 
 The bending rigidity is
 
-\[
+$$
 \boxed{
 D
 =
 \frac{E_{\mathrm{pcb}}h^3}
 {12(1-\nu^2)}.
 }
-\]
+$$
 
 For a simply supported rectangular plate,
 
-\[
+$$
 \boxed{
 \phi_{mn}(x,y)
 =
@@ -777,11 +777,11 @@ For a simply supported rectangular plate,
 \frac{n\pi y}{b}
 \right)
 }
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \omega_{mn}
 =
@@ -795,15 +795,15 @@ and
 \frac{n^2}{b^2}
 \right).
 }
-\]
+$$
 
 Then
 
-\[
+$$
 f_{mn}
 =
 \frac{\omega_{mn}}{2\pi}.
-\]
+$$
 
 ### Interpretation
 
@@ -820,9 +820,9 @@ It is **not** expected to reproduce bolt-constrained experimental natural freque
 
 # 16. Harmonic Modal Response
 
-For a mode \(n\), use the frequency-domain generalized coordinate
+For a mode $n$, use the frequency-domain generalized coordinate
 
-\[
+$$
 q_n(\omega)
 =
 \frac{Q_n}
@@ -836,32 +836,32 @@ m_n
 j2\zeta_n\omega_n\omega
 \right]
 }.
-\]
+$$
 
 where:
 
-- \(Q_n\): generalized modal excitation,
-- \(m_n\): modal mass,
-- \(\zeta_n\): modal damping ratio.
+- $Q_n$: generalized modal excitation,
+- $m_n$: modal mass,
+- $\zeta_n$: modal damping ratio.
 
 The total displacement is
 
-\[
+$$
 w(x,y,\omega)
 =
 \sum_n
 \phi_n(x,y)q_n(\omega).
-\]
+$$
 
 Velocity is
 
-\[
+$$
 \boxed{
 v(x,y,\omega)
 =
 j\omega w(x,y,\omega).
 }
-\]
+$$
 
 The implementation must keep complex-valued response until amplitude or RMS quantities are explicitly computed.
 
@@ -871,13 +871,13 @@ The implementation must keep complex-valued response until amplitude or RMS quan
 
 For a point-force approximation,
 
-\[
+$$
 Q_n
 \propto
 F\phi_n(x_c,y_c),
-\]
+$$
 
-where \((x_c,y_c)\) is the capacitor location.
+where $(x_c,y_c)$ is the capacitor location.
 
 Therefore:
 
@@ -894,27 +894,27 @@ For an equivalent moment, coupling depends on the spatial derivative of the mode
 
 For an x-directed rotational source,
 
-\[
+$$
 Q_{mn}
 \propto
 M_{\mathrm{eq}}
 \left.
 \frac{\partial\phi_{mn}}{\partial x}
 \right|_{(x_c,y_c)}.
-\]
+$$
 
 For a y-directed rotational source,
 
-\[
+$$
 Q_{mn}
 \propto
 M_{\mathrm{eq}}
 \left.
 \frac{\partial\phi_{mn}}{\partial y}
 \right|_{(x_c,y_c)}.
-\]
+$$
 
-Therefore, rotating the same MLCC by \(90^\circ\) may change the excited modal spectrum.
+Therefore, rotating the same MLCC by $90^\circ$ may change the excited modal spectrum.
 
 The code must treat orientation as a model input, not as metadata.
 
@@ -928,17 +928,17 @@ Use PCB vibration metrics as acoustic-noise proxies.
 
 ## 19.1 Point velocity
 
-\[
+$$
 Score_1(f)
 =
 \left|
 v(x_{\mathrm{obs}},y_{\mathrm{obs}},f)
 \right|.
-\]
+$$
 
 ## 19.2 Surface RMS velocity
 
-\[
+$$
 Score_2(f)
 =
 \sqrt{
@@ -947,13 +947,13 @@ Score_2(f)
 |v(x,y,f)|^2
 \,dA
 }.
-\]
+$$
 
 Approximate the surface integral numerically on a regular grid.
 
 ## 19.3 Broadband vibration score
 
-\[
+$$
 Score_3
 =
 \sqrt{
@@ -961,7 +961,7 @@ Score_3
 w_f
 Score_2(f)^2
 }.
-\]
+$$
 
 Initially use
 
@@ -1362,7 +1362,7 @@ For each geometry, evaluate:
 5. How sensitive is the resonance prediction to support assumptions?
 6. Is the geometry practical to fabricate and mount?
 
-Always include the \(100 \times 40 \times 1\) mm literature reference geometry.
+Always include the $100 \times 40 \times 1$ mm literature reference geometry.
 
 ---
 
@@ -1634,21 +1634,21 @@ d_eff vs Vdc
 
 Automated tests must confirm numerically that:
 
-\[
+$$
 A_1
 =
 (d+2ME_{\mathrm{DC}})E_{\mathrm{AC}}
-\]
+$$
 
 and
 
-\[
+$$
 A_2
 =
 \frac12ME_{\mathrm{AC}}^2.
-\]
+$$
 
-For fixed \(E_{\mathrm{DC}}\):
+For fixed $E_{\mathrm{DC}}$:
 
 - `A1` is linear in `E_ac`,
 - `A2` is quadratic in `E_ac`.
@@ -1716,7 +1716,7 @@ PCB response at 2f
 
 ## Important harmonic rule
 
-An electrical input at frequency \(f\) can create a mechanical response at both:
+An electrical input at frequency $f$ can create a mechanical response at both:
 
 ```text
 f
@@ -1790,7 +1790,7 @@ A condition where two candidate capacitor classes or two model hypotheses predic
 
 A generic score may be written as
 
-\[
+$$
 Score
 =
 w_1S_{\mathrm{source}}
@@ -1802,7 +1802,7 @@ w_3S_{\mathrm{harmonic}}
 w_4S_{\mathrm{robustness}}
 +
 w_5S_{\mathrm{discrimination}}.
-\]
+$$
 
 Do not hard-code weights into the physics module.
 
@@ -2022,33 +2022,33 @@ This order makes debugging and interpretation substantially easier.
 
 Verify the closed-form relationships:
 
-\[
+$$
 A_1 \propto E_{\mathrm{AC}}
-\]
+$$
 
-for fixed \(E_{\mathrm{DC}}\), and
+for fixed $E_{\mathrm{DC}}$, and
 
-\[
+$$
 A_2 \propto E_{\mathrm{AC}}^2.
-\]
+$$
 
 Also verify:
 
-\[
+$$
 d_{\mathrm{eff}}
 =
 d+2ME_{\mathrm{DC}}.
-\]
+$$
 
 ---
 
 ## Stage 2 — Harmonic sanity check
 
-For a synthetic parameter set with nonzero \(d\) and \(M\):
+For a synthetic parameter set with nonzero $d$ and $M$:
 
 - generate the time-domain strain,
 - FFT the waveform,
-- verify peaks at \(f\) and \(2f\),
+- verify peaks at $f$ and $2f$,
 - compare FFT amplitudes against the analytical expressions.
 
 This stage should use synthetic coefficients specifically chosen for numerical clarity.
@@ -2077,7 +2077,7 @@ Do not claim exact reproduction unless the required material coefficients and st
 
 ## Stage 4 — PCB modal sanity check
 
-Run the \(100 \times 40 \times 1\) mm PCB geometry.
+Run the $100 \times 40 \times 1$ mm PCB geometry.
 
 Check:
 
@@ -2245,10 +2245,10 @@ Before the final purchasing decision, the simulation should produce defensible a
 2. Which PCB thickness gives a measurable but not excessively dense modal spectrum?
 3. Where should the MLCC be placed for maximum modal coupling?
 4. Where should a low-coupling control placement be located?
-5. How strongly does a \(90^\circ\) MLCC rotation change response?
-6. Does the fundamental \(f\) component or the second harmonic \(2f\) overlap more strongly with a PCB resonance?
+5. How strongly does a $90^\circ$ MLCC rotation change response?
+6. Does the fundamental $f$ component or the second harmonic $2f$ overlap more strongly with a PCB resonance?
 7. Which DC-bias range is most informative for separating electromechanical behavior?
-8. How many AC-amplitude levels are needed to distinguish approximately linear \(A_1\) scaling from quadratic \(A_2\) scaling?
+8. How many AC-amplitude levels are needed to distinguish approximately linear $A_1$ scaling from quadratic $A_2$ scaling?
 9. Which package-size comparison is most informative?
 10. Which capacitor comparison groups can share the same SKUs?
 11. Which candidate PCB designs remain useful under support/damping uncertainty?
@@ -2421,7 +2421,7 @@ After candidate commercial parts are selected:
 
 The initial simulator is complete when it can:
 
-- reproduce the analytical \(f\) and \(2f\) strain components,
+- reproduce the analytical $f$ and $2f$ strain components,
 - compute rectangular-PCB modal frequencies and mode shapes,
 - calculate position- and orientation-dependent coupling,
 - calculate complex harmonic PCB response,
@@ -2442,7 +2442,7 @@ Do not model the capacitor as a black box that “produces sound when voltage is
 
 Preserve the physical chain:
 
-\[
+$$
 \boxed{
 V
 \rightarrow
@@ -2456,7 +2456,7 @@ M_{\mathrm{eq}}
 \rightarrow
 \text{vibration proxy}
 }
-\]
+$$
 
 This separation is essential because an observed spectral peak may originate from different mechanisms:
 
@@ -2489,7 +2489,7 @@ config/benchmarks/kim_2019_mlcc.yaml
 Requirements:
 
 1. Implement voltage-amplitude convention conversion.
-2. Implement \(E(t)\), \(S(t)\), \(A_1\), \(A_2\), and \(d_{\mathrm{eff}}\).
+2. Implement $E(t)$, $S(t)$, $A_1$, $A_2$, and $d_{\mathrm{eff}}$.
 3. Generate a synthetic waveform and FFT.
 4. Verify analytical and numerical harmonic amplitudes.
 5. Save all figures and CSV outputs under `results/`.
