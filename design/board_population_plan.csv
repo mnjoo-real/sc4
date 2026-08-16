@@ -1,0 +1,16 @@
+variant,capacitor_role,capacitor_part_number,dielectric,capacitance,rated_voltage_V,footprint,qty,purpose
+S90-0603,R,0603ZD105KAT2A,X5R,1 uF,10,0603,3,reference - Phase 1 validation; reused as baseline arm in Phases 2/3/4/7/8
+S90-0603,C1,TBD,X5R,0.1 uF,10,0603,2,capacitance comparison (low) - Phase 3
+S90-0603,C2,TBD,X5R,10 uF,10,0603,2,capacitance comparison (high) - Phase 3
+S90-0603,V1,TBD,X5R,1 uF,16,0603,2,rated-voltage comparison - Phase 4
+S90-0603,V2,TBD,X5R,1 uF,25,0603,2,rated-voltage comparison - Phase 4
+S90-0603,V3,TBD,X5R,1 uF,50,0603,2,rated-voltage comparison - Phase 4
+S90-0603,N1,TBD,C0G,TBD - open (see notes),TBD - open (see notes),0603,2,C0G qualitative negative control - Phase 6
+S90-0402,P1,TBD,X5R,1 uF,10,0402,3,package-size comparison (0402) - Phase 2
+S90-0402,SPARE,n/a,n/a,n/a,n/a,0402,2,unpopulated spare board; capacitor role deferred until assigned
+S90-0805,P2,TBD,X5R,1 uF,10,0805,3,package-size comparison (0805) - Phase 2; reused as dielectric-comparison arm in Phase 5
+S90-0805,D1,TBD,X7R,1 uF,10,0805,2,dielectric comparison (X7R vs X5R at 0805/1uF/10V) - Phase 5
+W90-0603,R,0603ZD105KAT2A,X5R,1 uF,10,0603,3,reference - Phase 1 validation; reused as baseline arm in Phases 2/3/4/7/8
+W90-0603,SPARE,n/a,n/a,n/a,n/a,0603,2,unpopulated spare board; capacitor role deferred until assigned
+S0-0603,R,0603ZD105KAT2A,X5R,1 uF,10,0603,3,reference - Phase 1 validation; reused as baseline arm in Phases 2/3/4/7/8
+S0-0603,SPARE,n/a,n/a,n/a,n/a,0603,2,unpopulated spare board; capacitor role deferred until assigned
