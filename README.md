@@ -1,5 +1,162 @@
 # Singing capacitor — pre-experiment numerical model
 
+## PCB ordering — start here
+
+A validated PCB fabrication package for all 5 board variants exists under
+[`pcb/`](pcb/). This section is a navigation index only — the files linked
+below are the source of truth; nothing here duplicates their content.
+
+**Start here:**
+[`pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md`](pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md)
+
+This is the top-level summary of the current PCB fabrication package and
+records whether each board variant has passed the required KiCad/DRC/
+Gerber/drill/visual checks.
+
+For detailed per-board validation — including the authoritative
+`READY_FOR_JLCPCB` status for each variant — see
+[`pcb/FABRICATION_REVIEW.md`](pcb/FABRICATION_REVIEW.md). **Only order a
+board whose entry there is marked ready.**
+
+### The five board variants
+
+    S90-0402
+    S90-0603
+    S90-0805
+    W90-0603
+    S0-0603
+
+### Where the actual files are, per variant
+
+| what | where | for |
+|---|---|---|
+| Editable KiCad source | `pcb/<variant>/<variant>.kicad_pcb` | opening/editing in KiCad |
+| Raw Gerber + drill files | `pcb/<variant>/manufacturing/gerbers/` | inspection, not direct upload |
+| **JLCPCB upload archive** | `pcb/<variant>/manufacturing/<variant>_JLCPCB_Gerber.zip` | **upload this to JLCPCB** |
+| Gerber verification images | `pcb/<variant>/manufacturing/gerber_verification/` | checking the export against the design before ordering |
+| KiCad 3D renders | `pcb/<variant>/renders/` | visual sanity-check, not fabrication input |
+
+**The `*_JLCPCB_Gerber.zip` file is the file to upload to JLCPCB.** Do not
+upload the `.kicad_pcb`/`.kicad_pro` source files, the PNG renders, or the
+DRC/validation reports — those are for review, not fabrication input.
+
+The five current upload archives:
+
+- [`pcb/S90-0402/manufacturing/S90-0402_JLCPCB_Gerber.zip`](pcb/S90-0402/manufacturing/S90-0402_JLCPCB_Gerber.zip)
+- [`pcb/S90-0603/manufacturing/S90-0603_JLCPCB_Gerber.zip`](pcb/S90-0603/manufacturing/S90-0603_JLCPCB_Gerber.zip)
+- [`pcb/S90-0805/manufacturing/S90-0805_JLCPCB_Gerber.zip`](pcb/S90-0805/manufacturing/S90-0805_JLCPCB_Gerber.zip)
+- [`pcb/W90-0603/manufacturing/W90-0603_JLCPCB_Gerber.zip`](pcb/W90-0603/manufacturing/W90-0603_JLCPCB_Gerber.zip)
+- [`pcb/S0-0603/manufacturing/S0-0603_JLCPCB_Gerber.zip`](pcb/S0-0603/manufacturing/S0-0603_JLCPCB_Gerber.zip)
+
+### Before ordering — read in this order
+
+1. [`pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md`](pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md) — current fabrication-package summary.
+2. [`pcb/FABRICATION_REVIEW.md`](pcb/FABRICATION_REVIEW.md) — detailed per-board validation, `READY_FOR_JLCPCB` status, and the Gerber/drill/render file map.
+3. [`design/jlcpcb_order_settings.csv`](design/jlcpcb_order_settings.csv) — the JLCPCB fabrication options to select on the quote/order page (material, layers, thickness, copper weight, surface finish, etc.).
+4. [`design/pcb_quantity_plan.csv`](design/pcb_quantity_plan.csv) — planned bare-PCB order quantities, per variant.
+5. [`design/board_population_plan.csv`](design/board_population_plan.csv) — how the ordered boards are intended to be populated with MLCCs for the experiment.
+6. [`design/PCB_FABRICATION_SPEC.md`](design/PCB_FABRICATION_SPEC.md) — detailed fabrication/design rationale and the common board specification.
+7. [`design/PCB_CAD_ASSUMPTIONS.md`](design/PCB_CAD_ASSUMPTIONS.md) — fabrication/CAD parameters not originally fixed in v0.3.0, and the assumptions/fixes made while generating the KiCad files.
+
+**⚠ Quantity check before the final order:** `pcb_quantity_plan.csv` is the
+order-quantity source; `board_population_plan.csv` is the specimen
+population source, and should be checked against it before the final
+purchase. As of this writing they **do not agree for S90-0603**:
+`board_population_plan.csv` calls for 15 populated S90-0603 specimens
+(R×3, C1×2, C2×2, V1×2, V2×2, V3×2, N1×2), but
+`pcb_quantity_plan.csv` currently plans to order only 5 S90-0603 boards.
+The other four variants (S90-0402, S90-0805, W90-0603, S0-0603) agree
+(5 planned = 5 needed each). Before placing the final order, verify that
+the fabrication quantity plan covers the specimen population plan — this
+README does not resolve that inconsistency, and the quantity was not
+guessed here.
+
+### Placing the order
+
+1. Open `pcb/v0.3.1_FABRICATION_PACKAGE_SUMMARY.md`.
+2. Confirm the desired board is marked ready in `pcb/FABRICATION_REVIEW.md`.
+3. Open `design/jlcpcb_order_settings.csv`.
+4. Open `design/pcb_quantity_plan.csv` (and cross-check against
+   `board_population_plan.csv` per the warning above).
+5. Upload that variant's `*_JLCPCB_Gerber.zip` to JLCPCB.
+6. Confirm that JLCPCB correctly detects the board (outline, layer count,
+   size).
+7. Apply the fabrication options from `jlcpcb_order_settings.csv`.
+8. Set the quantity from the current quantity plan.
+9. Inspect the online Gerber preview (checklist below).
+10. Only then proceed to fabrication/payment.
+
+`design/jlcpcb_order_settings.csv` remains the source of truth for the
+actual option selections — the JLCPCB UI's exact labels aren't reproduced
+here.
+
+### What to check in the JLCPCB Gerber viewer
+
+Before paying, visually compare JLCPCB's preview against this repository's
+verified artifacts and confirm, at minimum:
+
+- board outline appears correct,
+- four mounting holes are present,
+- the MLCC footprint is present at the intended position,
+- S90 vs. S0 orientation is visibly different where intended,
+- top copper traces are present,
+- there is no unexpected bottom copper,
+- solder-mask openings are present over the intended pads,
+- no obvious trace or outline is missing.
+
+Reference images for this comparison:
+
+- `pcb/<variant>/manufacturing/gerber_verification/` — most relevant for
+  fabrication inspection, since these are rendered directly from the
+  exported Gerbers:
+  `<variant>_composite_top.png`, `<variant>_top_copper.png`,
+  `<variant>_solder_mask.png`, `<variant>_silkscreen.png`,
+  `<variant>_edge_cuts.png`
+- `pcb/<variant>/renders/` — real KiCad top/bottom/perspective 3D renders
+  (useful, but decorative relative to the Gerber-verification images above)
+- [`pcb/PCB_5_VARIANT_COMPARISON.png`](pcb/PCB_5_VARIANT_COMPARISON.png) — all five variants at the same scale, for a quick overview
+
+### Bare PCB vs. assembly
+
+The `*_JLCPCB_Gerber.zip` files are **PCB fabrication files only**.
+Uploading one orders a **bare PCB** — MLCC assembly is **not** included.
+See [`design/board_population_plan.csv`](design/board_population_plan.csv)
+for the intended capacitor population per board. Assembly (PCBA) is a
+separate deliverable, not covered by this package.
+
+### Directory map
+
+```
+pcb/
+├── v0.3.1_FABRICATION_PACKAGE_SUMMARY.md
+├── FABRICATION_REVIEW.md
+├── PCB_5_VARIANT_COMPARISON.png
+├── S90-0402/
+│   ├── S90-0402.kicad_pcb
+│   ├── manufacturing/
+│   │   ├── S90-0402_JLCPCB_Gerber.zip   <- upload this to JLCPCB
+│   │   ├── gerbers/
+│   │   ├── drc_report.txt
+│   │   ├── drill_report.txt
+│   │   └── gerber_verification/
+│   └── renders/
+├── S90-0603/
+├── S90-0805/
+├── W90-0603/
+└── S0-0603/
+```
+
+```
+design/
+├── jlcpcb_order_settings.csv
+├── pcb_quantity_plan.csv
+├── board_population_plan.csv
+├── PCB_FABRICATION_SPEC.md
+└── PCB_CAD_ASSUMPTIONS.md
+```
+
+---
+
 A lightweight simulation for planning a *singing capacitor* experiment before
 ordering the PCB and MLCCs.
 
